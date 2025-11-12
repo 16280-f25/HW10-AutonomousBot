@@ -14,11 +14,6 @@ class ImageOnlySteerNet(nn.Module):
     Outputs
     -------
     y: FloatTensor of shape [B, 5] — future omegas.
-
-    Notes
-    -----
-    - Uses a ResNet-18 encoder (global avg pooled to 512-D), then a small MLP head.
-    - Set `freeze_backbone=True` for quick tuning of just the head.
     """
     def __init__(
         self,
@@ -31,13 +26,16 @@ class ImageOnlySteerNet(nn.Module):
         super().__init__()
 
         # ---- Backbone (ResNet-18) ----
+        # TODO 1: Load a pretrained ResNet-18 model.
+        # If 'pretrained' is True, use ImageNet weights; otherwise, load random weights.
         if pretrained:
-            weights = models.ResNet18_Weights.IMAGENET1K_V1
+            weights = ---- # fill here
         else:
             weights = None
-        self.backbone = models.resnet18(weights=weights)
+            
+        # TODO 2: Initialize the ResNet-18 backbone with the chosen weights.
+        self.backbone = ---- # fill here
 
-        # Replace the classifier with identity; we use pooled features (512-D)
         in_feats = self.backbone.fc.in_features
         self.backbone.fc = nn.Identity()
 
@@ -46,11 +44,14 @@ class ImageOnlySteerNet(nn.Module):
                 p.requires_grad = False
 
         # ---- Regression head ----
+        # TODO 3: Build a small MLP head for regression.
+        # This should take 'in_feats' as input, include a hidden layer and dropout,
+        # and output 'out_len' steering values 
+        # Do not provide any activation at the end
+        # Use Linear layer with RelU activation
+        # Add a Dropout layer for regularization to reduce overfitting on small datasets.
         self.head = nn.Sequential(
-            nn.Linear(in_feats, hidden),
-            nn.ReLU(inplace=True),
-            nn.Dropout(p=dropout),
-            nn.Linear(hidden, out_len),  # regression (no activation)
+            # Develop your model here
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

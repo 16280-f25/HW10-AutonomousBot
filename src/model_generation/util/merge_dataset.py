@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# scripts/merge_runs_keep_splits.py
+
 """
 Merge any number of run folders into one merged dataset.
 

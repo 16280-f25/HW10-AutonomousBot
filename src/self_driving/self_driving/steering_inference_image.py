@@ -11,12 +11,9 @@ import numpy as np
 import threading, queue
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDurabilityPolicy
 from PIL import Image
-from self_driving.model import ImageOnlySteerNet   # use your new model
+from self_driving.model import ImageOnlySteerNet  
 import time
-"""
-run:
-  ros2 run steering_inference steering_image --ros-args -p model_path:=/home/abhi/turtle_pure_regression/ckpt_best.pt -p device:=cuda -p linear_vel:=0.01 -p flip_sign:=True
-"""
+
 
 class SteeringNode(Node):
     def __init__(self):
@@ -60,9 +57,8 @@ class SteeringNode(Node):
             durability=QoSDurabilityPolicy.VOLATILE,
         )
         self.bridge = CvBridge()
-        self.sub = self.create_subscription(
-            CompressedImage, '/image_raw/compressed', self.image_callback, qos_profile=qos)
-        self.pub = self.create_publisher(Twist, '/cmd_vel', 1)
+        self.sub = ........ # create a subscriber that subscribes to /image/compressed topic
+        self.pub = ......... # create a publisher that publishes to /cmd_vel topic
 
         # ---- Timer-driven publisher ----
         self.latest_omega = 0.0
@@ -70,13 +66,10 @@ class SteeringNode(Node):
 
         # ---- Preprocessing (matches training) ----
         self.tf = T.Compose([
-            T.ToPILImage(),
-            T.Lambda(lambda im: im.crop((0, int(im.height * 0.20), im.width, im.height))),
-            T.Resize(256),
-            T.CenterCrop(224),
-            T.ToTensor(),
-            T.Normalize(mean=[0.485, 0.456, 0.406],
-                        std=[0.229, 0.224, 0.225]),
+            # TODO: Convert the image (NumPy array) to PIL Image,
+            # TODO: Crop the top 20% of the image (use a lambda)
+            # TODO: Resize and center crop to 224×224 for ResNet
+            # TODO: Convert to a normalized tensor
         ])
 
         # ---- Runtime smoothing ----
@@ -111,14 +104,15 @@ class SteeringNode(Node):
                 msg = self.frame_q.get(timeout=1.0)
             except queue.Empty:
                 continue
-
+            
+            # TODO: Decode the incoming compressed image into a CV2 image
             np_arr = np.frombuffer(msg.data, np.uint8)
-            cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+            cv_image = .....
             if cv_image is None:
                 continue
 
-            # Preprocess
-            img_tensor = self.tf(cv_image).unsqueeze(0).to(self.device, non_blocking=True)
+            # TODO: Preprocess the image into a PyTorch tensor
+            img_tensor = .....
 
             # Inference
             with torch.inference_mode():
@@ -126,24 +120,10 @@ class SteeringNode(Node):
                 y_raw = y_std * self.sigma + self.mu
                 omega = float(self.omega_sign * y_raw.item())
 
-            # Optional smoothing & clamp
-            # alpha = 0.3
-            # self.omega_f = alpha * omega + (1 - alpha) * self.omega_f
-            # max_slew = 0.4
-            # delta = self.omega_f - self.omega_prev
-            # delta = np.clip(delta, -max_slew, max_slew)
-            # self.omega_prev += delta
-            # omega_cmd = np.clip(self.omega_prev, -0.6, 0.6)
-            #
             omega_cmd = omega
             # Optional gain scaling (tunable)
             self.latest_omega = float(1.2* omega_cmd)
 
-            #self.get_logger().info_throttle(
-            #    1.0,
-            #    f"ω_cmd={omega_cmd:+.3f} rad/s  (raw={omega:+.3f})",
-            #)
-            # Simple periodic print every second
             now = time.time()
             if not hasattr(self, "_last_log_t") or now - self._last_log_t > 1.0:
                 self._last_log_t = now
@@ -153,10 +133,11 @@ class SteeringNode(Node):
     # ---------------------------------------------------
     def publish_cmd(self):
         """Timer callback: publish latest steering command at fixed rate."""
-        twist = Twist()
-        twist.linear.x = self.linear_vel
-        twist.angular.z = self.latest_omega
-        self.pub.publish(twist)
+        # TODO: Create a new Twist message
+        # TODO: Set the forward linear velocity (x-axis)
+        # TODO: Set the angular velocity for steering (z-axis)
+        # TODO: Publish the velocity command
+
 
 # -------------------------------------------------------
 from rclpy.executors import MultiThreadedExecutor

@@ -27,6 +27,7 @@ from rclpy.serialization import deserialize_message
 from rosidl_runtime_py.utilities import get_message
 
 
+'''Basic helpers for unit conversions, timestamp formatting, and directory creation.'''
 def ns_to_sec(ns: int) -> float:
     return ns / 1e9
 
@@ -62,6 +63,7 @@ def dir_size_bytes(path: pathlib.Path) -> int:
 
 def read_bag_messages(bag_path, wanted_topics):
     """
+    Opens a ROS2 bag and extracts all messages for specified topics.
     Returns:
       streams: dict(topic -> list of (t_bag_ns:int, msg:Any)), sorted by time
       type_map: dict(topic -> ROS msg type string)
@@ -101,6 +103,7 @@ def read_bag_messages(bag_path, wanted_topics):
 
 
 def print_bag_info(bag_path: pathlib.Path, streams: dict, type_map: dict, image_topic: str, cmd_topic: str):
+"""Displays topic list, message counts, duration, and approximate rate."""
     print("=" * 72)
     print(f"Bag path        : {bag_path}")
     print(f"Bag size        : {dir_size_bytes(bag_path)/1e6:.2f} MB")

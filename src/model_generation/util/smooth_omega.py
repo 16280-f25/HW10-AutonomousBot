@@ -2,6 +2,42 @@ import json, random, argparse, os
 import numpy as np
 from tqdm import tqdm
 
+"""
+Apply temporal smoothing to angular velocity labels (omega) in the dataset index.
+
+---------------------------------------------------------------------------
+Purpose:
+    Smooths the steering command sequence to remove high-frequency noise
+    and produce cleaner target labels for learning-based control models.
+
+Functionality:
+    1. Loads an existing dataset index file (index.json or index_split.json).
+    2. Extracts all "label.omega" values (angular velocities).
+    3. Applies a centered moving-average filter with a configurable window size.
+    4. Replaces each record’s label.omega with the smoothed value.
+    5. Saves the updated records to a new JSON file (e.g., index_smooth.json).
+
+Usage:
+    python3 smooth_labels.py --index path/to/index_split.json [--out index_smooth.json] [--win 5]
+
+Example:
+    python3 smooth_labels.py --index ./dataset/index_split.json --win 5
+
+Parameters:
+    --index : Path to input dataset index.
+    --out   : Output filename (optional; default = index_smooth.json in same folder).
+    --win   : Half-window size for smoothing kernel (default = 5 frames).
+
+Notes:
+    • Implements a normalized moving-average kernel:
+          kernel = np.ones(2*win + 1) / (2*win + 1)
+    • Uses 'same' convolution mode to preserve array length.
+    • Reports mean and max change in ω after smoothing for verification.
+    • Helps the model learn smoother, more consistent steering responses.
+---------------------------------------------------------------------------
+"""
+
+
 def main():
     # === CONFIG ===
     ap = argparse.ArgumentParser()
