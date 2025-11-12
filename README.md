@@ -67,6 +67,9 @@ $ nano turtlebot3_ws/src/turtlebot3/turtlebot3_teleop/turtlebot3_teleop/script/t
 **Modify line #89 <br>
 rlist, _, _ = select.select([sys.stdin], [], [], 0.03) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # 0.03 s timeout (~33 Hz); originally 0.1 s (~10 Hz)**
 
+**Modify line #60 <br>
+ANG_VEL_STEP_SIZE = 0.05 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Decreasing the step size of angular velocity**
+
 
 Compile and source subsequently
 
